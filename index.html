@@ -196,20 +196,13 @@
                 }
             }
            
-            
-            if (rightPressed) {
-                paddleX = Math.min(paddleX + 7, canvas.width - paddleWidth); // ensures paddle doesn't go off canvas
-            } else if (leftPressed) {
-                paddleX = Math.max(paddleX - 7, 0);  // ensures paddle doesn't go off canvas
-            }
-
-            if (rightPressed && paddleX < canvas.width-paddleWidth) {
+            if(rightPressed && paddleX < canvas.width-paddleWidth) {
                 paddleX += 7;
             }
-            else if (leftPressed && paddleX > 0) {
+            else if(leftPressed && paddleX > 0) {
                 paddleX -= 7;
             }
-            // move the ball 
+
             x += dx;
             y += dy;
             requestAnimationFrame(draw);   
