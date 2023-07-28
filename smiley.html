@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gaming is awesome</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      canvas { /* the canvas where game is rendered */
+        background: #75cfd4;
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="480" height="320"></canvas> <!-- where the game is rendered -->
+
+    <script>
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+        
+
+
+        function drawSmiley() { 
+          ctx.beginPath();
+          ctx.arc(240, 190, 100, 0, Math.PI *2, false);
+          ctx.strokeStyle = "rgba(0, 0, 255, 1)";
+          ctx.fillStyle = "purple";
+          ctx.fill();
+          ctx.stroke();
+          ctx.closePath();
+
+          ctx.beginPath();
+          ctx.arc(280, 160, 10, 0, Math.PI*2, false);
+          ctx.fillStyle = "black";
+          ctx.fill();
+          ctx.closePath();
+
+          ctx.beginPath();
+          ctx.arc(200, 160, 10, 0, Math.PI*2, false);
+          ctx.fillStyle = "black";
+          ctx.fill();
+          ctx.closePath();
+          
+
+          ctx.beginPath();
+          ctx.arc( 240, 220, 25, 0, Math.PI, false);
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          // ctx.fillStyle = "black";
+          // ctx.fill();
+          ctx.closePath();
+        }
+        drawSmiley();
+
+        
+
+
+
+    </script>
+  </body>
+</html>
