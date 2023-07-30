@@ -33,6 +33,8 @@
         game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
         ball = game.add.sprite(50, 50, "ball"); // show ball sprite on screen
         game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
+        ball.body.collideWorldBounds = true; // make ball collide with canvas 
+        ball.body.bounce.set(1); // allow ball to bounce off walls
         ball.body.velocity.set(150, 150); // set ball velocity
         
       }
