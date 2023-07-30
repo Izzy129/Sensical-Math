@@ -18,9 +18,35 @@
         create,
         update,
       });
-      function preload() {}
-      function create() {}
-      function update() {}
+      let ball; 
+      function preload() {
+        // these next three lines are for scaling the game canvas automatically
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
+        // set background color
+        game.stage.backgroundColor = "#75cfd4";
+        // load ball sprite
+        game.load.image("ball", "img/ball.png");
+      }
+      function create() {
+        game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
+        ball = game.add.sprite(50, 50, "ball"); // show ball sprite on screen
+        game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
+        ball.body.velocity.set(150, 150); // set ball velocity
+        
+      }
+      function update() { // this is ran every frame
+        /* in the puro js version, we had to manually update the ball position
+        and check for collisions. In phaser, we just need to enable physics and 
+        phaser will handle the rest. 
+        aka it's a lot easier */
+        // ball.x +=1;
+        // ball.y +=1;
+
+
+
+      }
     </script>
   </body>
 </html>
