@@ -40,7 +40,14 @@
         ball.body.collideWorldBounds = true; // make ball collide with canvas 
         ball.body.bounce.set(1); // allow ball to bounce off walls
         ball.body.velocity.set(150, -150); // set ball velocity
-
+        game.physics.arcade.checkCollision.down = false; // disable ball collision on bottom wall
+        ball.checkWorldBounds = true;
+        ball.events.onOutOfBounds.add(() => {
+          alert("Game over!");
+          location.reload();
+        }, this);
+        
+        
         paddle = game.add.sprite(
           game.world.width * 0.5, // half x-axis
           game.world.height - 5, // spawns slightly above bottom
