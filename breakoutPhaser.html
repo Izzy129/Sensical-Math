@@ -19,6 +19,8 @@
         update,
       });
       let ball; 
+      let paddle;
+
       function preload() {
         // these next three lines are for scaling the game canvas automatically
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -28,15 +30,26 @@
         game.stage.backgroundColor = "#75cfd4";
         // load ball sprite
         game.load.image("ball", "img/ball.png");
+        game.load.image("paddle", "img/paddle.png");
       }
       function create() {
         game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
-        ball = game.add.sprite(50, 50, "ball"); // show ball sprite on screen
+        ball = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "ball"); // show sprite on screen
+        ball.anchor.set(0.5); // offset the ball above paddle
         game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
         ball.body.collideWorldBounds = true; // make ball collide with canvas 
         ball.body.bounce.set(1); // allow ball to bounce off walls
-        ball.body.velocity.set(150, 150); // set ball velocity
-        
+        ball.body.velocity.set(150, -150); // set ball velocity
+
+        paddle = game.add.sprite(
+          game.world.width * 0.5, // half x-axis
+          game.world.height - 5, // spawns slightly above bottom
+          "paddle", // sprite name
+        );
+        paddle.anchor.set(0.5, 1); // this makes the paddle actually center, instead of only being centered by the top left edge
+        game.physics.enable(paddle, Phaser.Physics.ARCADE);  
+        paddle.body.immovable = true; // this will make the paddle not move when hit by the ball
+      
       }
       function update() { // this is ran every frame
         /* in the puro js version, we had to manually update the ball position
@@ -45,8 +58,9 @@
         aka it's a lot easier */
         // ball.x +=1;
         // ball.y +=1;
+        game.physics.arcade.collide(ball, paddle); // check for collision between ball and paddle
 
-
+        paddle.x = game.input.x || game.world.width * 0.5 // move paddle with input, either touch or mouse
 
       }
     </script>
