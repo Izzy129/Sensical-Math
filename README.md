@@ -1,5 +1,5 @@
 # Sensical-Math
-## This is a cross-platform project developed to help [UIL Number Sense](https://www.uiltexas.org/academics/stem/number-sense) competitors practice problems via a web app. 
+## A cross-platform project developed to help [UIL Number Sense](https://www.uiltexas.org/academics/stem/number-sense) competitors practice arithmetic and NS problems via a web app. 
  Mobile will be supported with the help of [Phaser](https://phaser.io), an HTML5 game development framework.
 
 ## Here is a rough outline (made in paint) of how one of the games will look like: 
