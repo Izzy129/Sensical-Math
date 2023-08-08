@@ -1,4 +1,4 @@
-# Sensical-Math
+# Sensical-Math (WIP)
 ## A cross-platform project developed to help [UIL Number Sense](https://www.uiltexas.org/academics/stem/number-sense) competitors practice arithmetic and NS problems via a web app. 
  Mobile will be supported with the help of [Phaser](https://phaser.io), an HTML5 game development framework.
 
