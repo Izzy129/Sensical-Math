@@ -1,75 +1,117 @@
 <!doctype html>
 <html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
-    <title>Breakout in Phaser</title>
-    <style>
-      * {
-        padding: 0;
-        margin: 0;
-      }
-    </style>
-    <script src="js/phaser.min.js"></script>
-  </head>
-  <body>
-    <script>
-      const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
-        preload,
-        create,
-        update,
-      });
-      let ball; 
-      let paddle;
 
-      function preload() {
-        // these next three lines are for scaling the game canvas automatically
-        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        game.scale.pageAlignHorizontally = true;
-        game.scale.pageAlignVertically = true;
-        // set background color
-        game.stage.backgroundColor = "#75cfd4";
-        // load ball sprite
-        game.load.image("ball", "img/ball.png");
-        game.load.image("paddle", "img/paddle.png");
-      }
-      function create() {
-        game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
-        ball = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "ball"); // show sprite on screen
-        ball.anchor.set(0.5); // offset the ball above paddle
-        game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
-        ball.body.collideWorldBounds = true; // make ball collide with canvas 
-        ball.body.bounce.set(1); // allow ball to bounce off walls
-        ball.body.velocity.set(150, -150); // set ball velocity
-        game.physics.arcade.checkCollision.down = false; // disable ball collision on bottom wall
-        ball.checkWorldBounds = true;
-        ball.events.onOutOfBounds.add(() => {
-          alert("Game over!");
-          location.reload();
-        }, this);
-        
-        
-        paddle = game.add.sprite(
-          game.world.width * 0.5, // half x-axis
-          game.world.height - 5, // spawns slightly above bottom
-          "paddle", // sprite name
-        );
-        paddle.anchor.set(0.5, 1); // this makes the paddle actually center, instead of only being centered by the top left edge
-        game.physics.enable(paddle, Phaser.Physics.ARCADE);  
-        paddle.body.immovable = true; // this will make the paddle not move when hit by the ball
-      
-      }
-      function update() { // this is ran every frame
-        /* in the puro js version, we had to manually update the ball position
-        and check for collisions. In phaser, we just need to enable physics and 
-        phaser will handle the rest. 
-        aka it's a lot easier */
-        // ball.x +=1;
-        // ball.y +=1;
-        game.physics.arcade.collide(ball, paddle); // check for collision between ball and paddle
+<head>
+  <meta charset="utf-8" />
+  <title>Breakout in Phaser</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+  <script src="js/phaser.min.js"></script>
+</head>
 
-        paddle.x = game.input.x || game.world.width * 0.5 // move paddle with input, either touch or mouse
+<body>
+  <script>
+    const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
+      preload,
+      create,
+      update,
+    });
+    let ball;
+    let paddle;
 
+    let bricks;
+    let newBrick;
+    let brickInfo;
+
+
+    function preload() {
+      // these next three lines are for scaling the game canvas automatically
+      game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      game.scale.pageAlignHorizontally = true;
+      game.scale.pageAlignVertically = true;
+      // set background color
+      game.stage.backgroundColor = "#75cfd4";
+      // load ball sprite
+      game.load.image("ball", "img/ball.png");
+      game.load.image("paddle", "img/paddle.png");
+      game.load.image("brik", "img/brick.png");
+
+    }
+    function create() {
+      game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
+      ball = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "ball"); // show sprite on screen
+      ball.anchor.set(0.5); // offset the ball above paddle
+      game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
+      ball.body.collideWorldBounds = true; // make ball collide with canvas 
+      ball.body.bounce.set(1); // allow ball to bounce off walls
+      ball.body.velocity.set(150, -150); // set ball velocity
+      game.physics.arcade.checkCollision.down = false; // disable ball collision on bottom wall
+      ball.checkWorldBounds = true;
+      ball.events.onOutOfBounds.add(() => {
+        alert("Game over!");
+        location.reload();
+      }, this);
+
+
+      paddle = game.add.sprite(
+        game.world.width * 0.5, // half x-axis
+        game.world.height - 5, // spawns slightly above bottom
+        "paddle", // sprite name
+      );
+      paddle.anchor.set(0.5, 1); // this makes the paddle actually center, instead of only being centered by the top left edge
+      game.physics.enable(paddle, Phaser.Physics.ARCADE);
+      paddle.body.immovable = true; // this will make the paddle not move when hit by the ball
+
+      initBricks();
+    }
+    function update() { // this is ran every frame
+      /* in the puro js version, we had to manually update the ball position
+      and check for collisions. In phaser, we just need to enable physics and 
+      phaser will handle the rest. 
+      aka it's a lot easier */
+      // ball.x +=1;
+      // ball.y +=1;
+      game.physics.arcade.collide(ball, paddle); // check for collision between ball and paddle
+
+      paddle.x = game.input.x || game.world.width * 0.5 // move paddle with input, either touch or mouse
+
+
+
+    }
+    function initBricks() {
+      brickInfo = {
+        width: 50,
+        height: 20,
+        count: {
+          row: 3,
+          col: 7,
+        },
+        offset: {
+          top: 50,
+          left: 60,
+        },
+        padding: 10,
+      };
+      bricks = game.add.group();
+      for (let c = 0; c < brickInfo.count.col; c++) {
+        for (let r = 0; r < brickInfo.count.row; r++) {
+          // create new brick and add it to the group
+          const brickX = c * (brickInfo.width + brickInfo.padding) + brickInfo.offset.left;
+          const brickY = r * (brickInfo.height + brickInfo.padding) + brickInfo.offset.top;
+          newBrick = game.add.sprite(brickX, brickY, "brick");
+          game.physics.enable(newBrick, Phaser.Physics.ARCADE);
+          newBrick.body.immovable = true;
+          newBrick.anchor.set(0.5);
+          bricks.add(newBrick);
+        }
       }
-    </script>
-  </body>
+
+    }
+  </script>
+</body>
+
 </html>
