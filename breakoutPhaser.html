@@ -20,13 +20,20 @@
       create,
       update,
     });
+
     let ball;
     let paddle;
-
     let bricks;
     let newBrick;
     let brickInfo;
-
+    let scoreText;
+    let score = 0;
+    let lives = 3;
+    let textStyle;
+    let livesText;
+    let lifeLostText;
+    let playing = false;
+    let startButton;
 
     function preload() {
       // these next three lines are for scaling the game canvas automatically
@@ -38,23 +45,22 @@
       // load ball sprite
       game.load.image("ball", "img/ball.png");
       game.load.image("paddle", "img/paddle.png");
-      game.load.image("brik", "img/brick.png");
+      game.load.image("brick", "img/brick.png");
+      game.load.spritesheet("ball", "img/wobble.png", 20, 20)
+      game.load.spritesheet("button", "img/button.png", 120, 40); // width 120, height 40
 
     }
     function create() {
       game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
+      game.physics.arcade.checkCollision.down = false; // disable ball collision on bottom wall
       ball = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "ball"); // show sprite on screen
+      ball.animations.add("wobble", [0, 1, 0, 2, 0, 1, 0, 2, 0], 24);
       ball.anchor.set(0.5); // offset the ball above paddle
       game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
       ball.body.collideWorldBounds = true; // make ball collide with canvas 
       ball.body.bounce.set(1); // allow ball to bounce off walls
-      ball.body.velocity.set(150, -150); // set ball velocity
-      game.physics.arcade.checkCollision.down = false; // disable ball collision on bottom wall
       ball.checkWorldBounds = true;
-      ball.events.onOutOfBounds.add(() => {
-        alert("Game over!");
-        location.reload();
-      }, this);
+      ball.events.onOutOfBounds.add(ballLeaveScreen, this); // cleaner than previous event handler
 
 
       paddle = game.add.sprite(
@@ -67,20 +73,53 @@
       paddle.body.immovable = true; // this will make the paddle not move when hit by the ball
 
       initBricks();
+
+      textStyle = { font: "18px Arial", fill: "#0095DD" };
+      scoreText = game.add.text(5, 5, 'Points: 0', textStyle);
+      livesText = game.add.text(game.world.width - 5, 5, `Lives: ${lives}`, textStyle);
+      livesText.anchor.set(1, 0);
+      lifeLostText = game.add.text(
+        game.world.width * 0.5, // x
+        game.world.height * 0.5, // y
+        "Life lost, click to continue", // text
+        textStyle,
+      );
+      lifeLostText.anchor.set(0.5);
+      lifeLostText.visible = false;
+      startButton = game.add.button(
+        game.world.width * 0.5,
+        game.world.height * 0.5,
+        "button",
+        startGame,
+        this,
+        1, // frame numbers and stuff
+        0,
+        2,
+      );
+      startButton.anchor.set(0.5);
     }
     function update() { // this is ran every frame
       /* in the puro js version, we had to manually update the ball position
       and check for collisions. In phaser, we just need to enable physics and 
       phaser will handle the rest. 
       aka it's a lot easier */
+      // e.g:
       // ball.x +=1;
       // ball.y +=1;
-      game.physics.arcade.collide(ball, paddle); // check for collision between ball and paddle
 
-      paddle.x = game.input.x || game.world.width * 0.5 // move paddle with input, either touch or mouse
+      game.physics.arcade.collide(ball, paddle, ballHitPaddle); // check for collision between ball and paddle. run ball wobble anim
+      game.physics.arcade.collide(ball, bricks, ballHitBrick); // collision with ball and bricks
+      // ballHitBrick is a function called when the ball hits a brick
+      // it will destroy the brick object
+      if (playing) {
+        paddle.x = game.input.x || game.world.width * 0.5;
+      }
 
-
-
+    }
+    function startGame() {
+      startButton.destroy();
+      ball.body.velocity.set(150, -150);
+      playing = true;
     }
     function initBricks() {
       brickInfo = {
@@ -102,15 +141,56 @@
           // create new brick and add it to the group
           const brickX = c * (brickInfo.width + brickInfo.padding) + brickInfo.offset.left;
           const brickY = r * (brickInfo.height + brickInfo.padding) + brickInfo.offset.top;
-          newBrick = game.add.sprite(brickX, brickY, "brick");
+          newBrick = game.add.sprite(brickX, brickY, 'brick');
           game.physics.enable(newBrick, Phaser.Physics.ARCADE);
           newBrick.body.immovable = true;
           newBrick.anchor.set(0.5);
           bricks.add(newBrick);
         }
       }
-
     }
+    function ballHitBrick(ball, brick) {
+      // brick.kill(); // destroy brick
+      // tween will make brick fade out nicely instead of disappearing instantly
+      const killTween = game.add.tween(brick.scale); // brick width and length will scale to 0 (disappearish)
+      killTween.to({ x: 0, y: 0 }, 200, Phaser.Easing.Linear.None); // 200ms, linear easing
+      killTween.onComplete.addOnce(() => {
+        brick.kill(); // after the tween anim is done, actually kill the brick
+      }, this);
+      killTween.start();
+
+
+
+      ballHitPaddle(ball, paddle)
+      score += 10; // points added
+      scoreText.setText(`Points: ${score}`); // update score text
+
+      if (score === brickInfo.count.row * brickInfo.count.col * 10) {
+        alert('You won the game, congratulations!');
+        location.reload();
+      }
+    }
+    function ballHitPaddle(ball, paddle) {
+      ball.animations.play("wobble");
+    }
+
+    function ballLeaveScreen() {
+      lives--;
+      if (lives) {
+        livesText.setText(`Lives: ${lives}`);
+        lifeLostText.visible = true;
+        ball.reset(game.world.width * 0.5, game.world.height - 25);
+        paddle.reset(game.world.width * 0.5, game.world.height - 5);
+        game.input.onDown.addOnce(() => {
+          lifeLostText.visible = false;
+          ball.body.velocity.set(150, -150);
+        }, this);
+      } else {
+        alert("You lost, game over!");
+        location.reload();
+      }
+    }
+
   </script>
 </body>
 
