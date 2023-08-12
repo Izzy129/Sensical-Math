@@ -10,11 +10,20 @@
       margin: 0;
     }
   </style>
-  <script src="assets/js/phaser.min.js"></script>
+  <script src="js/phaser.min.js"></script>
 </head>
 
 <body>
   <script>
+    // import twodigitfoil from './twodigitfoil.js'; 
+    // got an error from above so just put it here for now
+    function twodigitfoil() {
+      let num1 = Math.floor(Math.random() * 90 + 10);
+      let num2 = Math.floor(Math.random() * 90 + 10);
+      let question = num1 + " x " + num2;
+      let answer = num1 * num2;
+      return ([question, answer]);
+    }
     const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
       preload,
       create,
@@ -35,6 +44,13 @@
     let playing = false;
     let startButton;
 
+    let question;
+    let questionText;
+    let questionX;
+    let questionY;
+    let questionStyle = { font: "18px Arial", fill: "#000000" };
+
+
     function preload() {
       // these next three lines are for scaling the game canvas automatically
       game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -43,18 +59,18 @@
       // set background color
       game.stage.backgroundColor = "#75cfd4";
       // load ball sprite
-      game.load.image("ball", "assets/img/ball.png");
-      game.load.image("paddle", "assets/img/paddle.png");
-      game.load.image("brick", "assets/img/brick.png");
-      game.load.spritesheet("ball", "assets/img/wobble.png", 20, 20)
-      game.load.spritesheet("button", "assets/img/button.png", 120, 40); // width 120, height 40
+      game.load.image("ball", "img/ball.png");
+      game.load.image("paddle", "img/paddle.png");
+      game.load.image("brick", "img/brick.png");
+      game.load.spritesheet("ball", "img/wobble.png", 20, 20)
+      game.load.spritesheet("button", "img/button.png", 120, 40); // width 120, height 40
 
     }
     function create() {
       game.physics.startSystem(Phaser.Physics.ARCADE); // start the physics engine 
       game.physics.arcade.checkCollision.down = false; // disable ball collision on bottom wall
       ball = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "ball"); // show sprite on screen
-      ball.animations.add("wobble", [0, 1, 0, 2, 0, 1, 0, 2, 0], 24);
+      ball.animations.add("wobble", [0, 1, 0, 2, 0, 1, 0, 2, 0], 24); // load animations for ball wobble at 24 fps
       ball.anchor.set(0.5); // offset the ball above paddle
       game.physics.enable(ball, Phaser.Physics.ARCADE); // enable physics for ball 
       ball.body.collideWorldBounds = true; // make ball collide with canvas 
@@ -68,6 +84,7 @@
         game.world.height - 5, // spawns slightly above bottom
         "paddle", // sprite name
       );
+
       paddle.anchor.set(0.5, 1); // this makes the paddle actually center, instead of only being centered by the top left edge
       game.physics.enable(paddle, Phaser.Physics.ARCADE);
       paddle.body.immovable = true; // this will make the paddle not move when hit by the ball
@@ -97,6 +114,9 @@
         2,
       );
       startButton.anchor.set(0.5);
+
+
+
     }
     function update() { // this is ran every frame
       /* in the puro js version, we had to manually update the ball position
@@ -152,6 +172,12 @@
     function ballHitBrick(ball, brick) {
       // brick.kill(); // destroy brick
       // tween will make brick fade out nicely instead of disappearing instantly
+
+      questionX = ball.x;
+      questionY = ball.y;
+      question = game.add.text(questionX, questionY, twodigitfoil()[0], questionStyle);
+      question.anchor.set(0.5);
+
       const killTween = game.add.tween(brick.scale); // brick width and length will scale to 0 (disappearish)
       killTween.to({ x: 0, y: 0 }, 200, Phaser.Easing.Linear.None); // 200ms, linear easing
       killTween.onComplete.addOnce(() => {
@@ -159,6 +185,16 @@
       }, this);
       killTween.start();
 
+      // question start falling
+      game.physics.enable(question, Phaser.Physics.ARCADE);
+      question.body.velocity.set(0, 50);
+
+      // question disappears when it hits the paddle
+      game.physics.arcade.collide(question, paddle, () => {
+        alert("question hit paddle yoo")
+        console.log("question hit paddle yoo")
+      });
+    
 
 
       ballHitPaddle(ball, paddle)
