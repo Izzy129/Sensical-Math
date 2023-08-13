@@ -49,7 +49,7 @@
     let questionX;
     let questionY;
     let questionStyle = { font: "18px Arial", fill: "#000000" };
-
+    let questionFallSpeed = 50;
 
     function preload() {
       // these next three lines are for scaling the game canvas automatically
@@ -187,7 +187,7 @@
 
       // question start falling
       game.physics.enable(question, Phaser.Physics.ARCADE);
-      question.body.velocity.set(0, 50);
+      question.body.velocity.set(0, questionFallSpeed);
 
       // question disappears when it hits the paddle
       game.physics.arcade.collide(question, paddle, () => {

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Math</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+    <style>
+        .problem-container {
+            text-align: center;
+            margin-top: 100px;
+            font-size: 100px;
+        }
+
+        .timer-style {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 10px;
+            font-size: 30px;
+            font-family: sans-serif;
+            
+        }
+    </style>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <strong><p id="timer" class="timer-style"></p></strong>
+    
+
+    <div class="problem-container">
+        <p id="math-problem"></p>
+        <input type="text" id="answer-input">
+    </div>
+    <script>
+
+
+        let problemAmount = 10; // how many problems to generate
+        let timerSeconds = 60; // Set the timer duration in seconds
+        let countdownInterval;
+
+        const problems = [
+            { question: '\\[' + 10 + '\\text{ x } ' + 10 + '=\\]', answer: '100' },
+            // Add more problems as needed
+        ];
+        function twoDigitFoil(amount) { // generates specified amount of 2 digit foil problems and adds to problems array
+            for (let i = 0; i < amount; i++) {
+                let num1 = Math.floor(Math.random() * 90 + 10); // random number between 10 and 99
+                let num2 = Math.floor(Math.random() * 90 + 10); // random number between 10 and 99
+                let question = '\\[' + num1 + '\\text{ x } ' + num2 + '=\\]'; // mathjax format
+                let answer = num1 * num2 + '';
+                problems.push({ question: question, answer: answer }); // add to array
+            }
+            // console.log(problems);
+        }
+        twoDigitFoil(problemAmount);
+
+        const mathProblemElement = document.getElementById('math-problem'); // gets html elements
+        const answerInput = document.getElementById('answer-input'); // gets html elements
+        const timerElement = document.getElementById('timer'); // gets timer element
+        let currentProblemIndex = 0;
+
+        function displayProblem() {
+            mathProblemElement.textContent = problems[currentProblemIndex].question;
+            MathJax.typesetPromise().then(() => { // updates the mathjax display every question
+                answerInput.value = ''; // clears the answer input
+                answerInput.focus(); // refocus to keep flow going 
+            });
+
+
+        }
+
+        function checkAnswer() {
+            const userAnswer = answerInput.value; // gets the user's answer
+            const correctAnswer = problems[currentProblemIndex].answer; // get the correct answer
+
+            if (userAnswer === correctAnswer) { // check
+                currentProblemIndex = (currentProblemIndex + 1) % problems.length;
+                displayProblem(); // display next problem
+            }
+        }
+
+        function startTimer() {
+            countdownInterval = setInterval(() => {
+                timerElement.textContent = `Time: ${timerSeconds} seconds`;
+                timerSeconds--;
+
+                if (timerSeconds < 0) {
+                    clearInterval(countdownInterval);
+                    timerElement.textContent = `Time's up!`;
+                }
+            }, 1000);
+        }
+        startTimer(); // start the timer
+
+        answerInput.addEventListener('input', () => { // checks the current answer every time the user types
+            checkAnswer();
+        });
+
+        // Display the first problem when the page loads
+        displayProblem();
+    </script>
+</body>
+
+</html>
