@@ -41,14 +41,12 @@
     </div>
     <script>
 
-
         let problemAmount = 10; // how many problems to generate
         let timerSeconds = 10; // Set the timer duration in seconds
         let countdownInterval;
 
         const problems = [
             { question: '\\[' + 10 + '\\text{ x } ' + 10 + '=\\]', answer: '100' },
-            // Add more problems as needed
         ];
         function twoDigitFoil(amount) { // generates specified amount of 2 digit foil problems and adds to problems array
             for (let i = 0; i < amount; i++) {
@@ -60,7 +58,7 @@
             }
             // console.log(problems);
         }
-        twoDigitFoil(problemAmount);
+        twoDigitFoil(problemAmount); // adds 2 digit foil problems to problems array
 
         const mathProblemElement = document.getElementById('math-problem'); // gets html elements
         const answerInput = document.getElementById('answer-input'); // gets html elements
@@ -68,11 +66,6 @@
         let currentProblemIndex = 0;
 
         function displayProblem() {
-            if (timerSeconds < 0) {
-                answerInput.disabled = true;
-                answerInput.value = 'Time\'s up!';
-                return;
-            }
             mathProblemElement.textContent = problems[currentProblemIndex].question;
             MathJax.typesetPromise().then(() => { // updates the mathjax display every question
                 answerInput.value = ''; // clears the answer input
@@ -98,6 +91,8 @@
                 if (timerSeconds < 0) {
                     clearInterval(countdownInterval);
                     timerElement.textContent = `Time's up!`;
+                    answerInput.disabled = true;
+                    answerInput.value = 'Time\'s up!';
                 }
             }, 1000);
         }
