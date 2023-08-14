@@ -43,7 +43,7 @@
 
 
         let problemAmount = 10; // how many problems to generate
-        let timerSeconds = 60; // Set the timer duration in seconds
+        let timerSeconds = 10; // Set the timer duration in seconds
         let countdownInterval;
 
         const problems = [
@@ -68,13 +68,16 @@
         let currentProblemIndex = 0;
 
         function displayProblem() {
+            if (timerSeconds < 0) {
+                answerInput.disabled = true;
+                answerInput.value = 'Time\'s up!';
+                return;
+            }
             mathProblemElement.textContent = problems[currentProblemIndex].question;
             MathJax.typesetPromise().then(() => { // updates the mathjax display every question
                 answerInput.value = ''; // clears the answer input
                 answerInput.focus(); // refocus to keep flow going 
             });
-
-
         }
 
         function checkAnswer() {
@@ -105,6 +108,7 @@
         });
 
         // Display the first problem when the page loads
+        
         displayProblem();
     </script>
 </body>
