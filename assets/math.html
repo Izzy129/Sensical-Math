@@ -41,12 +41,13 @@
     </div>
     <script>
 
-        let problemAmount = 10; // how many problems to generate
-        let timerSeconds = 10; // Set the timer duration in seconds
+
+        let problemAmount = window.prompt("How many problems to generate? (default 10)", "10"); // how many problems to generate
+        let timerSeconds = window.prompt("How long should the timer be (default 60s)", "60") // Set the timer duration in seconds
         let countdownInterval;
 
         const problems = [
-            { question: '\\[' + 10 + '\\text{ x } ' + 10 + '=\\]', answer: '100' },
+            // { question: '\\[' + 10 + '\\text{ x } ' + 10 + '=\\]', answer: '100' },
         ];
         function twoDigitFoil(amount) { // generates specified amount of 2 digit foil problems and adds to problems array
             for (let i = 0; i < amount; i++) {
@@ -56,15 +57,22 @@
                 let answer = num1 * num2 + '';
                 problems.push({ question: question, answer: answer }); // add to array
             }
-            // console.log(problems);
+            debugPrint();
         }
         twoDigitFoil(problemAmount); // adds 2 digit foil problems to problems array
+        function debugPrint() { // prints the problems array to the console
+            let output = '';
+            for (let i = 0; i < problems.length; i++) {
+                output+= problems[i].question + ' ' + problems[i].answer + '\n';
+            }
+            alert(output);
+        }
 
         const mathProblemElement = document.getElementById('math-problem'); // gets html elements
         const answerInput = document.getElementById('answer-input'); // gets html elements
         const timerElement = document.getElementById('timer'); // gets timer element
         let currentProblemIndex = 0;
-
+        
         function displayProblem() {
             mathProblemElement.textContent = problems[currentProblemIndex].question;
             MathJax.typesetPromise().then(() => { // updates the mathjax display every question
@@ -76,10 +84,15 @@
         function checkAnswer() {
             const userAnswer = answerInput.value; // gets the user's answer
             const correctAnswer = problems[currentProblemIndex].answer; // get the correct answer
-
             if (userAnswer === correctAnswer) { // check
-                currentProblemIndex = (currentProblemIndex + 1) % problems.length;
-                displayProblem(); // display next problem
+                problems.shift(); // removes the first index 
+                if ( problems.length > 0) {
+                    displayProblem(); // display next problem
+                } else {
+                    mathProblemElement.textContent = 'You\'re done!'; // display when done
+                    answerInput.disabled = true; // disable the input
+                    clearInterval(countdownInterval); // stop the timer
+                }
             }
         }
 
