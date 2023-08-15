@@ -23,7 +23,7 @@
             margin: 10px;
             font-size: 30px;
             font-family: sans-serif;
-            
+
         }
     </style>
 
@@ -32,47 +32,51 @@
 </head>
 
 <body>
-    <strong><p id="timer" class="timer-style"></p></strong>
-    
+    <strong>
+        <p id="timer" class="timer-style"></p>
+    </strong>
 
     <div class="problem-container">
         <p id="math-problem"></p>
         <input type="text" id="answer-input">
     </div>
+    
+    
     <script>
-
-
-        let problemAmount = window.prompt("How many problems to generate? (default 10)", "10"); // how many problems to generate
+        let problemAmount = window.prompt("How many problems to generate? (default 10)", "10"); // how many problems to generate        
         let timerSeconds = window.prompt("How long should the timer be (default 60s)", "60") // Set the timer duration in seconds
         let countdownInterval;
+        let currentProblemIndex = 0;
 
-        const problems = [
-            // { question: '\\[' + 10 + '\\text{ x } ' + 10 + '=\\]', answer: '100' },
-        ];
-        function twoDigitFoil(amount) { // generates specified amount of 2 digit foil problems and adds to problems array
+        const problems = twoDigitFoil(problemAmount); // adds 2 digit foil problems to problems array
+
+        const mathProblemElement = document.getElementById('math-problem'); // gets html elements
+        const answerInput = document.getElementById('answer-input'); // gets html elements
+        const timerElement = document.getElementById('timer'); // gets timer element
+        startTimer(); // start the timer
+        
+        answerInput.addEventListener('input', () => { // checks the current answer every time the user types
+            checkAnswer();
+        });
+
+        // Display the first problem when the page loads
+        displayProblem();
+        
+        // end of main code
+
+
+        function twoDigitFoil(amount) { // returns array of n 2 digit foil problems
+            let probs = [];
             for (let i = 0; i < amount; i++) {
                 let num1 = Math.floor(Math.random() * 90 + 10); // random number between 10 and 99
                 let num2 = Math.floor(Math.random() * 90 + 10); // random number between 10 and 99
                 let question = '\\[' + num1 + '\\text{ x } ' + num2 + '=\\]'; // mathjax format
                 let answer = num1 * num2 + '';
-                problems.push({ question: question, answer: answer }); // add to array
+                probs.push({ question: question, answer: answer }); // add to array
             }
-            debugPrint();
+            return probs;
+            // debugPrint();
         }
-        twoDigitFoil(problemAmount); // adds 2 digit foil problems to problems array
-        function debugPrint() { // prints the problems array to the console
-            let output = '';
-            for (let i = 0; i < problems.length; i++) {
-                output+= problems[i].question + ' ' + problems[i].answer + '\n';
-            }
-            alert(output);
-        }
-
-        const mathProblemElement = document.getElementById('math-problem'); // gets html elements
-        const answerInput = document.getElementById('answer-input'); // gets html elements
-        const timerElement = document.getElementById('timer'); // gets timer element
-        let currentProblemIndex = 0;
-        
         function displayProblem() {
             mathProblemElement.textContent = problems[currentProblemIndex].question;
             MathJax.typesetPromise().then(() => { // updates the mathjax display every question
@@ -80,13 +84,12 @@
                 answerInput.focus(); // refocus to keep flow going 
             });
         }
-
         function checkAnswer() {
             const userAnswer = answerInput.value; // gets the user's answer
             const correctAnswer = problems[currentProblemIndex].answer; // get the correct answer
             if (userAnswer === correctAnswer) { // check
                 problems.shift(); // removes the first index 
-                if ( problems.length > 0) {
+                if (problems.length > 0) {
                     displayProblem(); // display next problem
                 } else {
                     mathProblemElement.textContent = 'You\'re done!'; // display when done
@@ -95,7 +98,6 @@
                 }
             }
         }
-
         function startTimer() {
             countdownInterval = setInterval(() => {
                 timerElement.textContent = `Time: ${timerSeconds} seconds`;
@@ -109,15 +111,13 @@
                 }
             }, 1000);
         }
-        startTimer(); // start the timer
-
-        answerInput.addEventListener('input', () => { // checks the current answer every time the user types
-            checkAnswer();
-        });
-
-        // Display the first problem when the page loads
-        
-        displayProblem();
+        function debugPrint() { // prints the problems array to the console
+            let output = '';
+            for (let i = 0; i < problems.length; i++) {
+                output += problems[i].question + ' ' + problems[i].answer + '\n';
+            }
+            alert(output);
+        }
     </script>
 </body>
 
