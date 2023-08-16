@@ -10,6 +10,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="">
     <style>
+        .container {
+            display: flex;
+            /* justify-content: space-between; */
+            align-items: center;
+            /* margin-top: 100px; */
+        }
+
         .problem-container {
             text-align: center;
             margin-top: 100px;
@@ -25,6 +32,16 @@
             font-family: sans-serif;
 
         }
+
+        .column {
+            flex: 1;
+        }
+        .table-column {
+            flex: 0 0 auto; /* This column won't grow */
+            margin-left: auto; /* Pushes it to the right */
+            padding: 20px; /* Add some space */
+            box-sizing: border-box;
+        }
     </style>
 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -36,12 +53,27 @@
         <p id="timer" class="timer-style"></p>
     </strong>
 
-    <div class="problem-container">
-        <p id="math-problem"></p>
-        <input type="text" id="answer-input">
+    <div class="container">
+        <div class="table-column">
+            <div class="problem-container">
+                <p id="math-problem"></p>
+                <input type="text" id="answer-input">
+            </div>
+        </div>
+        <div class="table-column">
+            <table id="problemTable">
+                <caption>Problem info</caption>
+                <tr>
+                    <th>Problem</th>
+                    <th>Answer</th>
+                    <th>Time Completed</th>
+                </tr>
+            </table>
+        </div>
     </div>
-    
-    
+
+
+
     <script>
         let problemAmount = window.prompt("How many problems to generate? (default 10)", "10"); // how many problems to generate        
         let timerSeconds = window.prompt("How long should the timer be (default 60s)", "60") // Set the timer duration in seconds
@@ -54,14 +86,14 @@
         const answerInput = document.getElementById('answer-input'); // gets html elements
         const timerElement = document.getElementById('timer'); // gets timer element
         startTimer(); // start the timer
-        
+
         answerInput.addEventListener('input', () => { // checks the current answer every time the user types
             checkAnswer();
         });
 
         // Display the first problem when the page loads
         displayProblem();
-        
+
         // end of main code
 
 
@@ -88,6 +120,8 @@
             const userAnswer = answerInput.value; // gets the user's answer
             const correctAnswer = problems[currentProblemIndex].answer; // get the correct answer
             if (userAnswer === correctAnswer) { // check
+                addRow();
+
                 problems.shift(); // removes the first index 
                 if (problems.length > 0) {
                     displayProblem(); // display next problem
@@ -118,6 +152,27 @@
             }
             alert(output);
         }
+        function addRow() {
+            let table = document.getElementById("problemTable");
+            let row = table.insertRow();
+            let cell1 = row.insertCell();
+            let cell2 = row.insertCell();
+            let cell3 = row.insertCell();
+
+            const regex = /(\d+)/g; // captures only the numbers from the mathjax format
+            const text = problems[currentProblemIndex].question; // current problem
+            const matches = [...text.matchAll(regex)]; // gets all matches from regex
+            if (matches.length >= 2) {  // matches found
+                const num1 = parseInt(matches[0][1]);
+                const num2 = parseInt(matches[1][1]);
+                cell1.innerHTML = num1 + ' x ' + num2;
+            } else { // if for some reason it doesn't work, defauly to question. shouldn't happen though?
+                cell1.innerHTML = problems[currentProblemIndex].question;
+            }
+            cell2.innerHTML = problems[currentProblemIndex].answer;
+            cell3.innerHTML = timerSeconds;
+        }
+
     </script>
 </body>
 
